@@ -1,0 +1,75 @@
+package br.com.acr.javaparser.service.rules;
+
+import br.com.acr.generic.domain.comment.ACRCommentDomain;
+import br.com.acr.generic.domain.comment.ACRPositionDomain;
+import br.com.acr.generic.domain.config.ACRChangeDomain;
+import br.com.acr.javaparser.domain.config.JPConfigDomain;
+import br.com.acr.javaparser.domain.config.JPRuleDomain;
+import br.com.acr.javaparser.domain.parser.JPMemberDomain;
+import br.com.acr.javaparser.service.parser.JavaParserService;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class RequireAnottationIfAttributeHasDefaultValueService implements JPRuleService {
+
+    public List<ACRCommentDomain> review(JPConfigDomain config, JPRuleDomain rule) throws IOException {
+
+        List<ACRCommentDomain> comments = new ArrayList<>();
+
+        for (ACRChangeDomain change : config.getMerge().getChanges()) {
+
+            String path = config.getPathSource() + "/" + change.getPath();
+
+            if (!path.endsWith(".java")) {
+                continue;
+            }
+
+            List<JPMemberDomain> members = JavaParserService.getMembers(path, config.getPathSource());
+
+            for (JPMemberDomain member : members) {
+
+                if (!member.isHasDefault()) {
+
+                    continue;
+
+                }
+
+                boolean hasAnottation = member.getAnottations().stream().anyMatch(anottation -> "Builder.Default".equals(anottation.getName()));
+
+                if (hasAnottation) {
+
+                    continue;
+
+                }
+
+                ACRCommentDomain comment = new ACRCommentDomain();
+                comment.setComment(getFormatedComment(rule.getComment(), member));
+                comment.setPosition(member.getPosition());
+
+                comments.add(comment);
+
+            }
+
+        }
+
+        return comments;
+
+    }
+
+    private static String getFormatedComment(String comment, JPMemberDomain member) {
+
+        ACRPositionDomain position = member.getPosition();
+
+        String formated = comment;
+        formated = formated.replace("#{VARIAVEL_NAME}", member.getName());
+        formated = formated.replace("#{FILE_NAME}", position.getPath());
+        formated = formated.replace("#{LINE_NUMBER}", String.valueOf(position.getStartInLine()));
+
+        return formated;
+
+
+    }
+
+}
