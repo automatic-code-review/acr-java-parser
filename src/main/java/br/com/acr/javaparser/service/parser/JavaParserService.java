@@ -4,12 +4,15 @@ import br.com.acr.generic.domain.comment.ACRPositionDomain;
 import br.com.acr.javaparser.domain.parser.JPAnottationDomain;
 import br.com.acr.javaparser.domain.parser.JPJavaDomain;
 import br.com.acr.javaparser.domain.parser.JPMemberDomain;
+import br.com.acr.javaparser.domain.parser.JPModifierDomain;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.BodyDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.AnnotationExpr;
@@ -58,6 +61,21 @@ public class JavaParserService {
                         }
 
                         break;
+
+                    }
+
+                }
+
+                if (member instanceof FieldDeclaration) {
+
+                    FieldDeclaration fieldDeclaration = (FieldDeclaration) member;
+
+                    for (Modifier modifier : fieldDeclaration.getModifiers()) {
+
+                        JPModifierDomain modifierDomain = new JPModifierDomain();
+                        modifierDomain.setName(modifier.getKeyword().name());
+                        
+                        memberDomain.addModifier(modifierDomain);
 
                     }
 

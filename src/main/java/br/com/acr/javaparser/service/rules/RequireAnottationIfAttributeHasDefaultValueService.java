@@ -41,6 +41,10 @@ public class RequireAnottationIfAttributeHasDefaultValueService implements JPRul
 
                 }
 
+                if (member.hasModifier("FINAL")) {
+                    continue;
+                }
+
                 if (member.hasAnottation("Builder.Default")) {
 
                     continue;
