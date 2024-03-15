@@ -2,6 +2,7 @@ package br.com.acr.javaparser.service.parser;
 
 import br.com.acr.generic.domain.comment.ACRPositionDomain;
 import br.com.acr.javaparser.domain.parser.JPAnottationDomain;
+import br.com.acr.javaparser.domain.parser.JPJavaDomain;
 import br.com.acr.javaparser.domain.parser.JPMemberDomain;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseResult;
@@ -17,21 +18,28 @@ import com.github.javaparser.ast.expr.NullLiteralExpr;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
 
 public class JavaParserService {
 
-    public static List<JPMemberDomain> getMembers(String path, String pathSource) throws IOException {
+    public static JPJavaDomain parse(String path, String pathSource) throws IOException {
 
-        List<JPMemberDomain> members = new ArrayList<>();
+        JPJavaDomain javaDomain = new JPJavaDomain();
         ParseResult<CompilationUnit> compilationUnit = new JavaParser().parse(Files.newInputStream(new File(path).toPath()));
 
         if (!compilationUnit.getResult().isPresent()) {
-            return members;
+            return javaDomain;
         }
 
         for (TypeDeclaration<?> type : compilationUnit.getResult().get().getTypes()) {
+
+            for (AnnotationExpr annotation : type.getAnnotations()) {
+
+                JPAnottationDomain anottationDomain = new JPAnottationDomain();
+                anottationDomain.setName(annotation.getName().asString());
+
+                javaDomain.addAnottation(anottationDomain);
+
+            }
 
             for (BodyDeclaration<?> member : type.getMembers()) {
 
@@ -60,7 +68,7 @@ public class JavaParserService {
                     JPAnottationDomain anottationDomain = new JPAnottationDomain();
                     anottationDomain.setName(annotation.getName().asString());
 
-                    memberDomain.addAnotation(anottationDomain);
+                    memberDomain.addAnottation(anottationDomain);
 
                 }
 
@@ -85,13 +93,13 @@ public class JavaParserService {
 
                 }
 
-                members.add(memberDomain);
+                javaDomain.addMember(memberDomain);
 
             }
 
         }
 
-        return members;
+        return javaDomain;
 
     }
 

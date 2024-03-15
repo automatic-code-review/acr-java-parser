@@ -5,6 +5,7 @@ import br.com.acr.generic.domain.comment.ACRPositionDomain;
 import br.com.acr.generic.domain.config.ACRChangeDomain;
 import br.com.acr.javaparser.domain.config.JPConfigDomain;
 import br.com.acr.javaparser.domain.config.JPRuleDomain;
+import br.com.acr.javaparser.domain.parser.JPJavaDomain;
 import br.com.acr.javaparser.domain.parser.JPMemberDomain;
 import br.com.acr.javaparser.service.parser.JavaParserService;
 
@@ -26,9 +27,13 @@ public class RequireAnottationIfAttributeHasDefaultValueService implements JPRul
                 continue;
             }
 
-            List<JPMemberDomain> members = JavaParserService.getMembers(path, config.getPathSource());
+            JPJavaDomain javaDomain = JavaParserService.parse(path, config.getPathSource());
 
-            for (JPMemberDomain member : members) {
+            if (!javaDomain.hasAnottation("Builder")) {
+                continue;
+            }
+
+            for (JPMemberDomain member : javaDomain.getMembers()) {
 
                 if (!member.isHasDefault()) {
 
@@ -36,9 +41,7 @@ public class RequireAnottationIfAttributeHasDefaultValueService implements JPRul
 
                 }
 
-                boolean hasAnottation = member.getAnottations().stream().anyMatch(anottation -> "Builder.Default".equals(anottation.getName()));
-
-                if (hasAnottation) {
+                if (member.hasAnottation("Builder.Default")) {
 
                     continue;
 
