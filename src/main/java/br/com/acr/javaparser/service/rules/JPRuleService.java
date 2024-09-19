@@ -7,8 +7,8 @@ import br.com.acr.javaparser.domain.config.JPRuleDomain;
 import java.io.IOException;
 import java.util.List;
 
-public interface JPRuleService {
+public interface JPRuleService<T extends JPRuleDomain> {
 
-    List<ACRCommentDomain> review(JPConfigDomain config, JPRuleDomain rule) throws IOException;
+    List<ACRCommentDomain> review(JPConfigDomain config, T rule) throws IOException;
 
 }

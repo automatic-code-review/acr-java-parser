@@ -6,8 +6,11 @@ public class JPRuleServiceFactory {
 
     public static JPRuleService create(JPRuleEnum type) {
 
-        if (type == JPRuleEnum.REQUIRE_ANOTTATION_IF_ATRRIBUTE_HAS_DEFAULT_VALUE) {
-            return new RequireAnottationIfAttributeHasDefaultValueService();
+        switch (type) {
+            case REQUIRE_ANOTTATION_IF_ATRRIBUTE_HAS_DEFAULT_VALUE:
+                return new RequireAnottationIfAttributeHasDefaultValueService();
+            case REQUIRE_PREFIX_ATTRIBUTE:
+                return new RequirePrefixAttributeService();
         }
 
         return null;

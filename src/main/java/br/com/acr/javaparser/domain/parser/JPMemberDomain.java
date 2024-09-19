@@ -13,6 +13,8 @@ public class JPMemberDomain extends JPHasAnottation {
 
     private String name;
 
+    private String type;
+
     private boolean hasDefault;
 
     private ACRPositionDomain position;

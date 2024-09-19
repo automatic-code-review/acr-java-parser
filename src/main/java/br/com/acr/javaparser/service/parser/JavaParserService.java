@@ -53,6 +53,7 @@ public class JavaParserService {
                     if (node instanceof VariableDeclarator) {
                         VariableDeclarator variable = (VariableDeclarator) node;
 
+                        memberDomain.setType(String.valueOf(variable.getType()));
                         memberDomain.setName(variable.getName().asString());
                         memberDomain.setHasDefault(variable.getInitializer().isPresent());
 
@@ -74,7 +75,7 @@ public class JavaParserService {
 
                         JPModifierDomain modifierDomain = new JPModifierDomain();
                         modifierDomain.setName(modifier.getKeyword().name());
-                        
+
                         memberDomain.addModifier(modifierDomain);
 
                     }

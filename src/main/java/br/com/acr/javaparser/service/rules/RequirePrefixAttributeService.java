@@ -4,7 +4,7 @@ import br.com.acr.generic.domain.comment.ACRCommentDomain;
 import br.com.acr.generic.domain.comment.ACRPositionDomain;
 import br.com.acr.generic.domain.config.ACRChangeDomain;
 import br.com.acr.javaparser.domain.config.JPConfigDomain;
-import br.com.acr.javaparser.domain.config.RequireAnottationIfAtributeHasDefaultValueRuleDomain;
+import br.com.acr.javaparser.domain.config.RequireAnottationIfAttributeHasDefaultValueRuleDomain;
 import br.com.acr.javaparser.domain.parser.JPJavaDomain;
 import br.com.acr.javaparser.domain.parser.JPMemberDomain;
 import br.com.acr.javaparser.service.parser.JavaParserService;
@@ -12,10 +12,14 @@ import br.com.acr.javaparser.service.parser.JavaParserService;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
-public class RequireAnottationIfAttributeHasDefaultValueService implements JPRuleService<RequireAnottationIfAtributeHasDefaultValueRuleDomain> {
+public class RequirePrefixAttributeService implements JPRuleService<RequireAnottationIfAttributeHasDefaultValueRuleDomain> {
 
-    public List<ACRCommentDomain> review(JPConfigDomain config, RequireAnottationIfAtributeHasDefaultValueRuleDomain rule) throws IOException {
+    @Override
+    public List<ACRCommentDomain> review(JPConfigDomain config, RequireAnottationIfAttributeHasDefaultValueRuleDomain rule) throws IOException {
 
         List<ACRCommentDomain> comments = new ArrayList<>();
 
@@ -29,26 +33,22 @@ public class RequireAnottationIfAttributeHasDefaultValueService implements JPRul
 
             JPJavaDomain javaDomain = JavaParserService.parse(path, config.getPathSource());
 
-            if (!javaDomain.hasAnottation("Builder")) {
-                continue;
-            }
-
             for (JPMemberDomain member : javaDomain.getMembers()) {
 
-                if (!member.isHasDefault()) {
-
-                    continue;
-
-                }
-
-                if (member.hasModifier("FINAL")) {
+                String name = member.getName();
+                if (name == null) {
                     continue;
                 }
 
-                if (member.hasAnottation("Builder.Default")) {
+                List<String> regexList = rule.getRegexByType(member.getType());
 
+                if (regexList.isEmpty()) {
+                    System.out.printf("Type %s not found%n", member.getType());
                     continue;
+                }
 
+                if (isRegexOk(regexList, name)) {
+                    continue;
                 }
 
                 ACRCommentDomain comment = new ACRCommentDomain();
@@ -57,11 +57,25 @@ public class RequireAnottationIfAttributeHasDefaultValueService implements JPRul
 
                 comments.add(comment);
 
+
             }
 
         }
 
         return comments;
+
+
+    }
+
+    private boolean isRegexOk(List<String> regexs, String text) {
+
+        return regexs.stream().anyMatch(regex -> Pattern.matches(regex, text));
+
+    }
+
+    private List<String> getRegexList(String type, Map<String, String> regex) {
+
+        return regex.keySet().stream().filter(key -> Pattern.matches(key, type)).map(regex::get).collect(Collectors.toList());
 
     }
 
