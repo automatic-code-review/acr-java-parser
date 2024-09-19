@@ -1,2 +1,4 @@
 .idea/
 target/
+/src/main/java/br/com/acr/config.json
+/src/main/java/br/com/acr/output.json

@@ -12,7 +12,11 @@ import lombok.Setter;
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
-@JsonSubTypes({@JsonSubTypes.Type(value = RequireAnottationIfAtributeHasDefaultValueRuleDomain.class, name = "REQUIRE_ANOTTATION_IF_ATRRIBUTE_HAS_DEFAULT_VALUE"), @JsonSubTypes.Type(value = RequireAnottationIfAttributeHasDefaultValueRuleDomain.class, name = "REQUIRE_PREFIX_ATTRIBUTE"),})
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = RequireAnottationIfAtributeHasDefaultValueRuleDomain.class, name = "REQUIRE_ANOTTATION_IF_ATRRIBUTE_HAS_DEFAULT_VALUE"),
+        @JsonSubTypes.Type(value = RequireAnottationIfAttributeHasDefaultValueRuleDomain.class, name = "REQUIRE_PREFIX_ATTRIBUTE"),
+        @JsonSubTypes.Type(value = PreferPrimitiveBooleanRuleDomain.class, name = "PREFER_PRIMITIVE_BOOLEAN"),
+})
 public abstract class JPRuleDomain {
 
     private String comment;

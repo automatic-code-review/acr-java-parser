@@ -1,20 +1,14 @@
 package br.com.acr.javaparser.service.parser;
 
 import br.com.acr.generic.domain.comment.ACRPositionDomain;
-import br.com.acr.javaparser.domain.parser.JPAnottationDomain;
-import br.com.acr.javaparser.domain.parser.JPJavaDomain;
-import br.com.acr.javaparser.domain.parser.JPMemberDomain;
-import br.com.acr.javaparser.domain.parser.JPModifierDomain;
+import br.com.acr.javaparser.domain.parser.*;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.body.BodyDeclaration;
-import com.github.javaparser.ast.body.FieldDeclaration;
-import com.github.javaparser.ast.body.TypeDeclaration;
-import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.NullLiteralExpr;
 
@@ -34,6 +28,42 @@ public class JavaParserService {
         }
 
         for (TypeDeclaration<?> type : compilationUnit.getResult().get().getTypes()) {
+
+            for (Node node : type.getChildNodes()) {
+
+                if (node instanceof MethodDeclaration) {
+                    MethodDeclaration methodDeclaration = (MethodDeclaration) node;
+
+                    JPMethodDomain methodDomain = new JPMethodDomain();
+                    methodDomain.setName(methodDeclaration.getName().toString());
+                    methodDomain.setReturnType(methodDeclaration.getType().toString());
+
+                    if (methodDeclaration.getRange().isPresent()) {
+
+                        Range range = methodDeclaration.getRange().get();
+
+                        String positionPath = path.replace(pathSource, "");
+
+                        if (positionPath.startsWith("/")) {
+
+                            positionPath = positionPath.substring(1);
+
+                        }
+
+                        ACRPositionDomain position = new ACRPositionDomain();
+                        position.setStartInLine(range.begin.line);
+                        position.setEndInLine(range.end.line);
+                        position.setPath(positionPath);
+
+                        methodDomain.setPosition(position);
+
+                    }
+
+                    javaDomain.addMethod(methodDomain);
+
+                }
+
+            }
 
             for (AnnotationExpr annotation : type.getAnnotations()) {
 

@@ -11,6 +11,9 @@ public class JPRuleServiceFactory {
                 return new RequireAnottationIfAttributeHasDefaultValueService();
             case REQUIRE_PREFIX_ATTRIBUTE:
                 return new RequirePrefixAttributeService();
+            case PREFER_PRIMITIVE_BOOLEAN:
+                return new PreferPrimitiveBooleanService();
+
         }
 
         return null;
