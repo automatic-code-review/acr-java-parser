@@ -15,6 +15,11 @@ Arquivo config.json
 }
 ```
 
+# rules
+
+- REQUIRE_PREFIX_ATTRIBUTE
+- REQUIRE_ANOTTATION_IF_ATRRIBUTE_HAS_DEFAULT_VALUE
+
 # Gerando o .jar
 ```
 mvn package
