@@ -7,11 +7,13 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class JPMethodDomain implements JPPositionableDomain {
+public class JPImportDomain implements JPPositionableDomain {
 
     private String name;
 
-    private String returnType;
+    private Boolean isStatic;
+
+    private Boolean isAsterisk;
 
     private ACRPositionDomain position;
 

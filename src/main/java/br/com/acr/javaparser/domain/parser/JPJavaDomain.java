@@ -14,12 +14,18 @@ public class JPJavaDomain extends JPHasAnottation {
 
     private List<JPMethodDomain> methods = new ArrayList<>();
 
+    private List<JPImportDomain> imports = new ArrayList<>();
+
     public void addMember(JPMemberDomain member) {
         members.add(member);
     }
 
     public void addMethod(JPMethodDomain method) {
         methods.add(method);
+    }
+
+    public void addImport(JPImportDomain jpImportDomain) {
+        imports.add(jpImportDomain);
     }
 
 }
