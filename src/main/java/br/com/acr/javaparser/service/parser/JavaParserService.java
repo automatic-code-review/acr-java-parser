@@ -2,10 +2,11 @@ package br.com.acr.javaparser.service.parser;
 
 import br.com.acr.generic.domain.comment.ACRPositionDomain;
 import br.com.acr.javaparser.domain.parser.*;
+
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseResult;
-import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.*;
@@ -15,19 +16,26 @@ import com.github.javaparser.ast.expr.NullLiteralExpr;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Optional;
 
 public class JavaParserService {
 
     public static JPJavaDomain parse(String path, String pathSource) throws IOException {
 
         JPJavaDomain javaDomain = new JPJavaDomain();
-        ParseResult<CompilationUnit> compilationUnit = new JavaParser().parse(Files.newInputStream(new File(path).toPath()));
+        ParseResult<CompilationUnit> compilationUnitParsed = new JavaParser().parse(Files.newInputStream(new File(path).toPath()));
+        Optional<CompilationUnit> compilationUnitOpt = compilationUnitParsed.getResult();
 
-        if (!compilationUnit.getResult().isPresent()) {
+        if (!compilationUnitOpt.isPresent()) {
             return javaDomain;
         }
 
-        for (TypeDeclaration<?> type : compilationUnit.getResult().get().getTypes()) {
+        String positionPath = path.replace(pathSource, "");
+        String relativePath = positionPath.startsWith("/") ? positionPath.substring(1) : positionPath;
+
+        CompilationUnit compilationUnit = compilationUnitOpt.get();
+
+        for (TypeDeclaration<?> type : compilationUnit.getTypes()) {
 
             for (Node node : type.getChildNodes()) {
 
@@ -38,26 +46,7 @@ public class JavaParserService {
                     methodDomain.setName(methodDeclaration.getName().toString());
                     methodDomain.setReturnType(methodDeclaration.getType().toString());
 
-                    if (methodDeclaration.getRange().isPresent()) {
-
-                        Range range = methodDeclaration.getRange().get();
-
-                        String positionPath = path.replace(pathSource, "");
-
-                        if (positionPath.startsWith("/")) {
-
-                            positionPath = positionPath.substring(1);
-
-                        }
-
-                        ACRPositionDomain position = new ACRPositionDomain();
-                        position.setStartInLine(range.begin.line);
-                        position.setEndInLine(range.end.line);
-                        position.setPath(positionPath);
-
-                        methodDomain.setPosition(position);
-
-                    }
+                    updateDomainPositionFromNode(methodDomain, methodDeclaration, relativePath);
 
                     javaDomain.addMethod(methodDomain);
 
@@ -121,26 +110,7 @@ public class JavaParserService {
 
                 }
 
-                if (member.getRange().isPresent()) {
-
-                    Range range = member.getRange().get();
-
-                    String positionPath = path.replace(pathSource, "");
-
-                    if (positionPath.startsWith("/")) {
-
-                        positionPath = positionPath.substring(1);
-
-                    }
-
-                    ACRPositionDomain position = new ACRPositionDomain();
-                    position.setStartInLine(range.begin.line);
-                    position.setEndInLine(range.end.line);
-                    position.setPath(positionPath);
-
-                    memberDomain.setPosition(position);
-
-                }
+                updateDomainPositionFromNode(memberDomain, member, relativePath);
 
                 javaDomain.addMember(memberDomain);
 
@@ -148,8 +118,33 @@ public class JavaParserService {
 
         }
 
+        for (ImportDeclaration importDeclaration : compilationUnit.getImports()) {
+
+            JPImportDomain importDomain = new JPImportDomain();
+            importDomain.setName(importDeclaration.getName().asString());
+            importDomain.setIsStatic(importDeclaration.isStatic());
+            importDomain.setIsAsterisk(importDeclaration.isAsterisk());
+
+            updateDomainPositionFromNode(importDomain, importDeclaration, relativePath);
+
+            javaDomain.addImport(importDomain);
+        }
+
         return javaDomain;
 
+    }
+
+    private static void updateDomainPositionFromNode(JPPositionableDomain positionableDomain, Node node, String relativePath) {
+
+        node.getRange().ifPresent(range -> {
+
+            ACRPositionDomain positionDomain = new ACRPositionDomain();
+            positionDomain.setStartInLine(range.begin.line);
+            positionDomain.setEndInLine(range.end.line);
+            positionDomain.setPath(relativePath);
+
+            positionableDomain.setPosition(positionDomain);
+        });
     }
 
 }

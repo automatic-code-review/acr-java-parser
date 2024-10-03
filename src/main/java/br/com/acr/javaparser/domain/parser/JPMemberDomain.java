@@ -9,7 +9,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class JPMemberDomain extends JPHasAnottation {
+public class JPMemberDomain extends JPHasAnottation implements JPPositionableDomain {
 
     private String name;
 

@@ -5,6 +5,7 @@ import br.com.acr.generic.domain.comment.ACRPositionDomain;
 import br.com.acr.generic.domain.config.ACRChangeDomain;
 import br.com.acr.javaparser.domain.config.JPConfigDomain;
 import br.com.acr.javaparser.domain.config.RequireAnottationIfAtributeHasDefaultValueRuleDomain;
+import br.com.acr.javaparser.domain.parser.JPImportDomain;
 import br.com.acr.javaparser.domain.parser.JPJavaDomain;
 import br.com.acr.javaparser.domain.parser.JPMemberDomain;
 import br.com.acr.javaparser.service.parser.JavaParserService;
@@ -33,12 +34,15 @@ public class RequireAnottationIfAttributeHasDefaultValueService implements JPRul
                 continue;
             }
 
+            boolean containsLombokBuilderDefault = javaDomain.getImports().stream()
+                    .map(JPImportDomain::getName)
+                    .anyMatch(importName -> importName.equals("lombok.Builder.Default"));
+
             for (JPMemberDomain member : javaDomain.getMembers()) {
 
                 if (!member.isHasDefault()) {
 
                     continue;
-
                 }
 
                 if (member.hasModifier("FINAL")) {
@@ -48,7 +52,11 @@ public class RequireAnottationIfAttributeHasDefaultValueService implements JPRul
                 if (member.hasAnottation("Builder.Default")) {
 
                     continue;
+                }
 
+                if (member.hasAnottation("Default") && containsLombokBuilderDefault) {
+
+                    continue;
                 }
 
                 ACRCommentDomain comment = new ACRCommentDomain();
