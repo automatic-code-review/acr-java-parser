@@ -30,13 +30,13 @@ public class RequireAnottationIfAttributeHasDefaultValueService implements JPRul
 
             JPJavaDomain javaDomain = JavaParserService.parse(path, config.getPathSource());
 
-            boolean containsLombokBuilderDefault = javaDomain.getImports().stream()
-                    .map(JPImportDomain::getName)
-                    .anyMatch(importName -> importName.equals("lombok.Builder.Default"));
-
             if (!javaDomain.hasAnottation("Builder")) {
                 continue;
             }
+
+            boolean containsLombokBuilderDefault = javaDomain.getImports().stream()
+                    .map(JPImportDomain::getName)
+                    .anyMatch(importName -> importName.equals("lombok.Builder.Default"));
 
             for (JPMemberDomain member : javaDomain.getMembers()) {
 
