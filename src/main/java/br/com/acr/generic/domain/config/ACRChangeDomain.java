@@ -14,4 +14,7 @@ public class ACRChangeDomain {
     @JsonProperty("new_path")
     private String path;
 
+    @JsonProperty("deleted_file")
+    private boolean deletedFile;
+
 }

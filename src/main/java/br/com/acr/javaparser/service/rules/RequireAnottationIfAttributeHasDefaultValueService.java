@@ -22,6 +22,10 @@ public class RequireAnottationIfAttributeHasDefaultValueService implements JPRul
 
         for (ACRChangeDomain change : config.getMerge().getChanges()) {
 
+            if (change.isDeletedFile()) {
+                continue;
+            }
+
             String path = config.getPathSource() + "/" + change.getPath();
 
             if (!path.endsWith(".java")) {

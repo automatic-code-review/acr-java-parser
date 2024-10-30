@@ -25,6 +25,10 @@ public class RequirePrefixAttributeService implements JPRuleService<RequireAnott
 
         for (ACRChangeDomain change : config.getMerge().getChanges()) {
 
+            if (change.isDeletedFile()) {
+                continue;
+            }
+
             String path = config.getPathSource() + "/" + change.getPath();
 
             if (!path.endsWith(".java")) {
